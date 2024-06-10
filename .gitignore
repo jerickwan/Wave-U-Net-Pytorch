@@ -1,0 +1,7 @@
+
+*.pyc
+environment.yaml
+*.hdf5
+*.0
+/checkpoints/waveunet
+train.txt
