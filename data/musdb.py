@@ -23,7 +23,7 @@ def get_musdbhq(database_path):
         for track_folder in sorted(tracks):
             # Skip track if mixture is already written, assuming this track is done already
             example = dict()
-            for stem in ["mix", "bass", "drums", "other", "vocals"]:
+            for stem in ["mix", "drums", "bass", "vocals"]:
                 filename = stem if stem != "mix" else "mixture"
                 audio_path = os.path.join(track_folder, filename + ".wav")
                 example[stem] = audio_path
@@ -34,7 +34,7 @@ def get_musdbhq(database_path):
             if not os.path.exists(acc_path):
                 print("Writing accompaniment to " + track_folder)
                 stem_audio = []
-                for stem in ["bass", "drums", "other"]:
+                for stem in ["drums", "bass"]:
                     audio, sr = load(example[stem], sr=None, mono=False)
                     stem_audio.append(audio)
                 acc_audio = np.clip(sum(stem_audio), -1.0, 1.0)
@@ -73,7 +73,7 @@ def get_musdb(database_path):
 
                 # Add paths and then skip
                 paths = {"mix" : mix_path, "accompaniment" : acc_path}
-                paths.update({key : track_path + "_" + key + ".wav" for key in ["bass", "drums", "other", "vocals"]})
+                paths.update({key : track_path + "_" + key + ".wav" for key in ["drums","bass","vocals"]})
 
                 samples.append(paths)
 
@@ -84,7 +84,7 @@ def get_musdb(database_path):
             # Go through each instrument
             paths = dict()
             stem_audio = dict()
-            for stem in ["bass", "drums", "other", "vocals"]:
+            for stem in ["drums", "bass", "vocals"]:
                 path = track_path + "_" + stem + ".wav"
                 audio = track.targets[stem].audio
                 write_wav(path, audio, rate)

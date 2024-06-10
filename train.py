@@ -5,6 +5,7 @@ from functools import partial
 
 import torch
 import pickle
+import yaml
 import numpy as np
 
 import torch.nn as nn
@@ -22,6 +23,10 @@ from model.waveunet import Waveunet
 
 def main(args):
     #torch.backends.cudnn.benchmark=True # This makes dilated conv much faster for CuDNN 7.5
+
+    # Save args
+    with open("args.yaml", "w") as f:
+        yaml.dump(args,f)
 
     # MODEL
     num_features = [args.features*i for i in range(1, args.levels+1)] if args.feature_growth == "add" else \
@@ -143,6 +148,7 @@ def main(args):
     #### TESTING ####
     # Test loss
     print("TESTING")
+    print(f"Best model path: {state['best_checkpoint']}")
 
     # Load best model based on validation loss
     state = model_utils.load_model(model, None, state["best_checkpoint"], args.cuda)
@@ -151,6 +157,7 @@ def main(args):
     writer.add_scalar("test_loss", test_loss, state["step"])
 
     # Mir_eval metrics
+
     test_metrics = evaluate(args, musdb["test"], model, args.instruments)
 
     # Dump all metrics results into pickle file for later analysis if needed
@@ -166,7 +173,6 @@ def main(args):
     overall_SDR = np.mean([v for v in avg_SDRs.values()])
     writer.add_scalar("test_SDR", overall_SDR)
     print("SDR: " + str(overall_SDR))
-
     writer.close()
 
 if __name__ == '__main__':

@@ -1,0 +1,31 @@
+!!python/object:argparse.Namespace
+batch_size: 4
+channels: 1
+checkpoint_dir: checkpoints/waveunet
+conv_type: gn
+cuda: false
+cycles: 2
+dataset_dir: C:\Users\Work\Documents\GitHub\Gut-Sound\ML\db
+depth: 1
+example_freq: 200
+feature_growth: double
+features: 32
+hdf_dir: hdf
+instruments:
+- vocals
+- bass
+- drums
+kernel_size: 5
+levels: 6
+load_model: C:\Users\Work\Documents\GitHub\Wave-U-Net-Pytorch\checkpoints\waveunet\checkpoint_59220
+log_dir: logs/waveunet
+loss: L1
+lr: 0.001
+min_lr: 5.0e-05
+num_workers: 1
+output_size: 2.0
+patience: 20
+res: fixed
+separate: 0
+sr: 44100
+strides: 4

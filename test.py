@@ -3,10 +3,10 @@ from tqdm import tqdm
 
 import numpy as np
 import torch
+import os
 
 import data.utils
 import model.utils as model_utils
-import utils
 
 def compute_model_output(model, inputs):
     '''
@@ -90,9 +90,8 @@ def predict_song(args, audio_path, model):
     :return: Source estimates given as dictionary with keys as source names
     '''
     model.eval()
-
     # Load mixture in original sampling rate
-    mix_audio, mix_sr = data.utils.load(audio_path, sr=None, mono=False)
+    mix_audio, mix_sr = data.utils.load(audio_path, sr=None, mono=False) #mono
     mix_channels = mix_audio.shape[0]
     mix_len = mix_audio.shape[1]
 
@@ -107,7 +106,6 @@ def predict_song(args, audio_path, model):
 
     # resample to model sampling rate
     mix_audio = data.utils.resample(mix_audio, mix_sr, args.sr)
-
     sources = predict(mix_audio, model)
 
     # Resample back to mixture sampling rate in case we had model on different sampling rate
@@ -135,6 +133,9 @@ def predict_song(args, audio_path, model):
 
         sources[key] = np.asfortranarray(sources[key]) # So librosa does not complain if we want to save it
 
+    # Resample back ### why????????
+    sources = {key : data.utils.resample(sources[key], mix_sr, args.sr) for key in sources.keys()}
+
     return sources
 
 def evaluate(args, dataset, model, instruments):
@@ -157,8 +158,13 @@ def evaluate(args, dataset, model, instruments):
 
             # Predict using mixture
             pred_sources = predict_song(args, example["mix"], model)
-            pred_sources = np.stack([pred_sources[key].T for key in instruments])
+            # Save prediction
+            output_folder = os.path.dirname(example["mix"])
+            for inst in pred_sources.keys():
+                data.utils.write_wav(os.path.join(output_folder, os.path.basename(example["mix"]) + "_" + inst + ".wav"),
+                                     pred_sources[inst], args.sr)
 
+            pred_sources = np.stack([pred_sources[key].T for key in instruments])
             # Evaluate
             SDR, ISR, SIR, SAR, _ = museval.metrics.bss_eval(target_sources, pred_sources)
             song = {}
